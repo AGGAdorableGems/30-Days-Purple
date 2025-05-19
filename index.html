@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affirmation Scratch Card - Warm Purple</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f0ff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card-container {
+      position: relative;
+      width: 95vw;
+      max-width: 900px;
+      height: 75vh;
+      max-height: 600px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .message {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #e6d5f7, #f0e6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      font-size: 2em;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="message" id="affirmation">
+    Loading affirmation...
+  </div>
+  <canvas id="scratchCanvas"></canvas>
+</div>
+
+<script>
+  const affirmations = [
+    "You are loved more than you know.",
+    "You are doing brilliantly.",
+    "You are thoughtful and caring.",
+    "You make others feel happy.",
+    "You are unique and special.",
+    "You are helpful and kind.",
+    "You are strong inside and out.",
+    "You are fun to be around.",
+    "You are growing in wonderful ways.",
+    "You are a good listener.",
+    "You make great choices.",
+    "You are worthy of kindness.",
+    "You are respectful and smart.",
+    "You are trusted.",
+    "You bring smiles to others.",
+    "You are full of good ideas.",
+    "You are calm and capable.",
+    "You are amazing just the way you are.",
+    "You can achieve your dreams.",
+    "You are important.",
+    "You can do hard things.",
+    "You matter so much.",
+    "You are creative and clever.",
+    "You are brave, even when it's tough.",
+    "You are a kind friend.",
+    "You have a big heart.",
+    "You are learning every day.",
+    "You are full of potential.",
+    "You are the reason someone smiled today.",
+    "You make the world brighter."
+  ];
+
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const affirmation = document.getElementById('affirmation');
+
+  const storageKey = 'affirmationStartDate';
+  let startDate = localStorage.getItem(storageKey);
+
+  if (!startDate) {
+    startDate = new Date().toISOString().split('T')[0];
+    localStorage.setItem(storageKey, startDate);
+  }
+
+  const today = new Date();
+  const start = new Date(startDate);
+  const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < affirmations.length) {
+    affirmation.textContent = affirmations[diffDays];
+  } else {
+    affirmation.textContent = "Well done for completing 30 days! Remember, you are loved and you can be whatever you dream to be.";
+  }
+
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#d9c2f1');
+  gradient.addColorStop(1, '#ebd6ff');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < 200; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2 + 0.5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.globalCompositeOperation = 'source-over';
+  let isDrawing = false;
+
+  function scratch(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, Math.PI * 2, false);
+    ctx.fill();
+  }
+
+  canvas.addEventListener('mousedown', () => isDrawing = true);
+  canvas.addEventListener('mouseup', () => isDrawing = false);
+  canvas.addEventListener('mousemove', e => isDrawing && scratch(e));
+
+  canvas.addEventListener('touchstart', () => isDrawing = true);
+  canvas.addEventListener('touchend', () => isDrawing = false);
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (isDrawing) scratch(e);
+  }, { passive: false });
+</script>
+
+</body>
+</html>
